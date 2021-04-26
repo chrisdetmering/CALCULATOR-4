@@ -1,116 +1,131 @@
-const numberButtons = document.querySelectorAll('.number');
-const operationButtons = document.querySelectorAll('.operation');
-const memoryButtons = document.querySelectorAll('.memory');
-const clearButton = document.querySelector('.clear');
-const equalSign = document.querySelector('.equal');
-const decimalNumber = document.querySelector('.decimal');
+const calculatorDisplay = document.querySelector('input'); 
 
 let firstNumber = '';
 let secondNumber = '';
 let operationSelected = '';
 let memoryNumber = '';
 
-numberButtons.forEach(numberButton => numberButton.addEventListener('click', typeNumbers));
-operationButtons.forEach(operationButton => operationButton.addEventListener('click', operationAssigned));
-memoryButtons.forEach(memoryButton => memoryButton.addEventListener('click', memoryCall));
-equalSign.addEventListener('click', operationAction);
-decimalNumber.addEventListener('click', decimalCheck);
+document.querySelectorAll('.number')
+.forEach(numberButton => numberButton.addEventListener('click', setNumber));
 
-function typeNumbers(e) {
+document.querySelectorAll('.operation')
+.forEach(operationButton => operationButton.addEventListener('click', operationAssigned));
+
+document.querySelectorAll('.memory')
+.forEach(memoryButton => memoryButton.addEventListener('click', memoryCall));
+
+document.querySelector('.equal')
+.addEventListener('click', () => {
+    if (firstNumber && operationSelected && secondNumber) {
+        const result = calculate();
+        firstNumber = result;
+        secondNumber = '';
+        calculatorDisplay.value = result; 
+    } 
+});
+
+document.querySelector('.decimal')
+.addEventListener('click', decimalCheck);
+
+function setNumber(e) {
     let numberSelection = e.target.value;
-    if (operationSelected !== '') {
+
+    if (operationSelected) {
         secondNumber += numberSelection;
-        document.querySelector('input').value = '';
-        document.querySelector('input').value = secondNumber;
+        calculatorDisplay.value = '';
+        calculatorDisplay.value = secondNumber;
     } else {
         firstNumber += numberSelection;
-        document.querySelector('input').value = firstNumber;
+        calculatorDisplay.value = firstNumber;
     }
 };
 
 function operationAssigned(e) {
-    if (firstNumber == '' && secondNumber == '') { }
-    else if (firstNumber !== '' && secondNumber == '') {
+    if (firstNumber && !secondNumber) {
         operationSelected = e.target.textContent;
-    } else if (firstNumber !== '' && secondNumber !== '') {
-        operationAction(operationSelected);
-        operationSelected = e.target.textContent;     
-    } else if (firstNumber == '' & secondNumber == '') {
-        firstNumber = document.querySelector('input').value;
-    }
+    } else if (firstNumber && operationSelected && secondNumber ) {
+        const result = calculate();
+        firstNumber = result;
+        secondNumber = '';
+        calculatorDisplay.value = result; 
+        operationSelected = e.target.textContent;
+    } 
 }
 
 function decimalCheck() {
-    if (operationSelected == '' && firstNumber.indexOf('.') == -1) {
+    if (!operationSelected && noDecimal(firstNumber)) {
         firstNumber += '.';
-        document.querySelector('input').value = firstNumber;
-    } else if (secondNumber.indexOf('.') == -1 && operationSelected !== '') {
+        calculatorDisplay.value = firstNumber;
+        return; 
+    } 
+    
+    if (noDecimal(secondNumber) && operationSelected !== '') {
         secondNumber += '.';
-        document.querySelector('input').value = secondNumber;
+        calculatorDisplay.value = secondNumber;
+        return; 
     }
 }
 
+function noDecimal(numberString) {
+    return numberString.indexOf('.') === -1;
+}
+
+ 
 function memoryCall(e) {
     memoryButton = e.target.value;
     switch (memoryButton) {
         case 'M+':
-            if (firstNumber !== '') {
-                memoryNumber = document.querySelector('input').value;
-            }
+            memoryNumber = document.querySelector('input').value;
             break;
         case 'M-':
             memoryNumber = '';
             break;
         case 'MR':
-            if (memoryNumber == '') { }
-            else if (operationSelected == '') {
-                document.querySelector('input').value = memoryNumber;
-                firstNumber = memoryNumber;
+            if (!firstNumber) {
+                firstNumber += memoryNumber; 
+                calculatorDisplay.value = firstNumber; 
+                return; 
             }
-            else if (secondNumber == '') {
-                secondNumber = memoryNumber;
-                document.querySelector('input').value = memoryNumber;
+            if (!secondNumber && operationSelected) {
+                secondNumber += memoryNumber; 
+                calculatorDisplay.value = secondNumber; 
+                return; 
             }
-            break;
+        return; 
     }
 }
 
-function operationAction() {
-    if (secondNumber != '') {
-        switch (operationSelected) {
-            case 'X':
-                let product = firstNumber * secondNumber;
-                document.querySelector('input').value = product;
-                irstNumber = product;
-                operationSelected = '';
-                secondNumber = '';
-                break;
-            case '/':
-                let division = firstNumber / secondNumber;
-                document.querySelector('input').value = division;
-                firstNumber = division;
-                operationSelected = '';
-                secondNumber = '';
-                break;
-            case '+':
-                let addition = parseFloat(firstNumber) + parseFloat(secondNumber);
-                document.querySelector('input').value = addition;
-                firstNumber = addition;
-                operationSelected = '';
-                secondNumber = '';
-                break;
-            case '-':
-                let subtraction = firstNumber - secondNumber;
-                document.querySelector('input').value = subtraction;
-                firstNumber = subtraction;
-                operationSelected = '';
-                secondNumber = '';
-                break;
-        }
+function calculate() {
+    switch (operationSelected) {
+        case 'X':
+            return multiply();
+        case '/':
+            return divide();
+        case '+':
+            return add();
+        case '-':
+            return subtract();
     }
 }
 
-clearButton.addEventListener('click', () => {
+function add() {
+    return `${Number(firstNumber) + Number(secondNumber)}`; 
+}
+
+function subtract() {
+    return `${Number(firstNumber) - Number(secondNumber)}`; 
+}
+
+function multiply() {
+    return `${Number(firstNumber) * Number(secondNumber)}`; 
+}
+
+function divide() {
+    return `${Number(firstNumber) / Number(secondNumber)}`; 
+}
+
+document.querySelector('.clear')
+.addEventListener('click', () => {
     document.querySelector('input').value = '';
     firstNumber = '';
     secondNumber = '';
